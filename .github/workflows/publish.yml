@@ -1,0 +1,38 @@
+name: Publish MOU to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - run: pip install --upgrade pip
+      - run: pip install build twine
+
+      - run: python -m build
+
+      - name: Test install
+        run: |
+          pip install dist/*.whl
+          python -c "import mou; print('MOU imported successfully!')"
+
+      - name: Publish to PyPI
+        if: matrix.os == 'ubuntu-latest'
+        uses: pypa/gh-action-pypi-publish@v1.6.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
