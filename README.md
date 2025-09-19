@@ -1,5 +1,3 @@
----
-
 # MOU GUI Toolkit
 
 **MOU (Modern UI)** is a lightweight, cross-platform Python GUI toolkit built on `tkinter`.
