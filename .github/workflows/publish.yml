@@ -3,8 +3,8 @@ name: Publish MOU to PyPI
 on:
   push:
     tags:
-      - "v*"
-      - "V*"
+      - 'v*'
+      - 'V*'
   release:
     types: [published]
   workflow_dispatch:
@@ -40,10 +40,8 @@ jobs:
   publish:
     needs: build-and-test
     runs-on: ubuntu-latest
-    # Run if workflow triggered manually, by release, or tag push
-    if: github.event_name == 'workflow_dispatch' || 
-        github.event_name == 'release' || 
-        contains(toLower(github.ref), 'refs/tags/v')
+    # Always runs for tag push, release, or manual dispatch
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' || github.event_name == 'push' }}
 
     steps:
       - name: Checkout repository
