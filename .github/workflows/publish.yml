@@ -7,31 +7,55 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
+  build-and-test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - run: pip install --upgrade pip
-      - run: pip install build twine
+      - name: Upgrade pip & install build tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel build twine
 
-      - run: python -m build
+      - name: Build the package
+        run: python -m build
 
-      - name: Test install
+      - name: Test local install
         run: |
           pip install dist/*.whl
           python -c "import mou; print('MOU imported successfully!')"
 
+  publish:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')  # Only publish on tag
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Upgrade pip & install build tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel build twine
+
+      - name: Build the package
+        run: python -m build
+
       - name: Publish to PyPI
-        if: matrix.os == 'ubuntu-latest'
         uses: pypa/gh-action-pypi-publish@v1.6.0
         with:
           user: __token__
