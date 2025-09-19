@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+      - "V*"   # Accept uppercase tags
   workflow_dispatch:
 
 jobs:
@@ -37,8 +38,8 @@ jobs:
   publish:
     needs: build-and-test
     runs-on: ubuntu-latest
-    # Run if workflow was triggered by tag push OR manually
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    # Run if workflow triggered manually OR tag (any case)
+    if: github.event_name == 'workflow_dispatch' || contains(toLower(github.ref), 'refs/tags/v')
 
     steps:
       - name: Checkout repository
