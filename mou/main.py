@@ -5,17 +5,25 @@ from tkinter import ttk
 # Base Widget
 # ------------------------
 class Widget:
-    def __init__(self, master):
+    def __init__(self, master, x=None, y=None):
         self.master = master
+        self.x = x
+        self.y = y
+
+    def _place_or_pack(self, widget):
+        if self.x is not None and self.y is not None:
+            widget.place(x=self.x, y=self.y)
+        else:
+            widget.pack(pady=5)
 
 # ------------------------
 # Labels
 # ------------------------
 class MLabel(Widget):
-    def __init__(self, master, text):
-        super().__init__(master)
+    def __init__(self, master, text, x=None, y=None):
+        super().__init__(master, x, y)
         self.label = ttk.Label(master, text=text)
-        self.label.pack(pady=5)
+        self._place_or_pack(self.label)
 
     def set_text(self, text):
         self.label.config(text=text)
@@ -24,20 +32,20 @@ class MLabel(Widget):
 # Buttons
 # ------------------------
 class MButton(Widget):
-    def __init__(self, master, text, command):
-        super().__init__(master)
+    def __init__(self, master, text, command, x=None, y=None):
+        super().__init__(master, x, y)
         self.button = ttk.Button(master, text=text, command=command)
-        self.button.pack(pady=5)
+        self._place_or_pack(self.button)
 
 # ------------------------
 # Checkboxes
 # ------------------------
 class MCheckbox(Widget):
-    def __init__(self, master, text):
-        super().__init__(master)
+    def __init__(self, master, text, x=None, y=None):
+        super().__init__(master, x, y)
         self.var = tk.IntVar()
         self.checkbox = ttk.Checkbutton(master, text=text, variable=self.var)
-        self.checkbox.pack(pady=5)
+        self._place_or_pack(self.checkbox)
 
     def is_checked(self):
         return self.var.get() == 1
@@ -46,13 +54,17 @@ class MCheckbox(Widget):
 # Radio Buttons
 # ------------------------
 class MRadioGroup(Widget):
-    def __init__(self, master, options):
-        super().__init__(master)
+    def __init__(self, master, options, x=None, y=None):
+        super().__init__(master, x, y)
         self.var = tk.StringVar()
         self.buttons = []
         for opt in options:
             rb = ttk.Radiobutton(master, text=opt, value=opt, variable=self.var)
-            rb.pack(anchor="w")
+            if x is not None and y is not None:
+                rb.place(x=x, y=y)
+                y += 25  # stack vertically when using place
+            else:
+                rb.pack(anchor="w")
             self.buttons.append(rb)
 
     def get_value(self):
@@ -62,10 +74,10 @@ class MRadioGroup(Widget):
 # Slider
 # ------------------------
 class MSlider(Widget):
-    def __init__(self, master, from_=0, to=100, orient='horizontal', command=None):
-        super().__init__(master)
+    def __init__(self, master, from_=0, to=100, orient='horizontal', command=None, x=None, y=None):
+        super().__init__(master, x, y)
         self.scale = ttk.Scale(master, from_=from_, to=to, orient=orient, command=command)
-        self.scale.pack(pady=5)
+        self._place_or_pack(self.scale)
 
     def get_value(self):
         return self.scale.get()
@@ -74,10 +86,10 @@ class MSlider(Widget):
 # Entry
 # ------------------------
 class MEntry(Widget):
-    def __init__(self, master):
-        super().__init__(master)
+    def __init__(self, master, x=None, y=None):
+        super().__init__(master, x, y)
         self.entry = ttk.Entry(master)
-        self.entry.pack(pady=5)
+        self._place_or_pack(self.entry)
 
     def get_text(self):
         return self.entry.get()
@@ -86,10 +98,10 @@ class MEntry(Widget):
 # Combobox
 # ------------------------
 class MCombobox(Widget):
-    def __init__(self, master, values):
-        super().__init__(master)
+    def __init__(self, master, values, x=None, y=None):
+        super().__init__(master, x, y)
         self.combobox = ttk.Combobox(master, values=values)
-        self.combobox.pack(pady=5)
+        self._place_or_pack(self.combobox)
 
     def get_value(self):
         return self.combobox.get()
@@ -98,10 +110,10 @@ class MCombobox(Widget):
 # Progress Bar
 # ------------------------
 class MProgressBar(Widget):
-    def __init__(self, master, length=200, mode='determinate'):
-        super().__init__(master)
+    def __init__(self, master, length=200, mode='determinate', x=None, y=None):
+        super().__init__(master, x, y)
         self.progress = ttk.Progressbar(master, length=length, mode=mode)
-        self.progress.pack(pady=5)
+        self._place_or_pack(self.progress)
 
     def set_value(self, value):
         self.progress['value'] = value
@@ -110,12 +122,12 @@ class MProgressBar(Widget):
 # Listbox
 # ------------------------
 class MList(Widget):
-    def __init__(self, master, items):
-        super().__init__(master)
+    def __init__(self, master, items, x=None, y=None):
+        super().__init__(master, x, y)
         self.listbox = tk.Listbox(master)
         for item in items:
             self.listbox.insert(tk.END, item)
-        self.listbox.pack(pady=5)
+        self._place_or_pack(self.listbox)
 
     def get_selected(self):
         return [self.listbox.get(i) for i in self.listbox.curselection()]
@@ -124,14 +136,14 @@ class MList(Widget):
 # Tree
 # ------------------------
 class MTree(Widget):
-    def __init__(self, master, columns, data):
-        super().__init__(master)
+    def __init__(self, master, columns, data, x=None, y=None):
+        super().__init__(master, x, y)
         self.tree = ttk.Treeview(master, columns=columns, show='headings')
         for col in columns:
             self.tree.heading(col, text=col)
         for row in data:
             self.tree.insert("", tk.END, values=row)
-        self.tree.pack(pady=5)
+        self._place_or_pack(self.tree)
 
     def get_selected(self):
         return self.tree.selection()
@@ -140,10 +152,13 @@ class MTree(Widget):
 # Tabs
 # ------------------------
 class MTabs(Widget):
-    def __init__(self, master):
-        super().__init__(master)
+    def __init__(self, master, x=None, y=None):
+        super().__init__(master, x, y)
         self.notebook = ttk.Notebook(master)
-        self.notebook.pack(expand=True, fill='both')
+        if x is not None and y is not None:
+            self.notebook.place(x=x, y=y, width=400, height=300)
+        else:
+            self.notebook.pack(expand=True, fill='both')
         self.tabs = {}
 
     def add_tab(self, name):
