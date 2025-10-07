@@ -18,6 +18,12 @@ It provides easy-to-use widgets like labels, buttons, sliders, trees, lists, tab
 
 ## 🚀 Installation
 
+Install using pip:
+
+```bash
+pip install mou-gui
+```
+
 Install directly from source:
 
 ```bash
